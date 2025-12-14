@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"  # Ubuntu 22.04
-#  config.vm.box.url =
+
   # Shared folder visible to ALL VMs
   config.vm.synced_folder "./shared", "/vagrant_shared"
   config.trigger.before :up do |t|
@@ -18,8 +18,6 @@ Vagrant.configure("2") do |config|
     sudo apt install -y openssh-server net-tools
     sudo systemctl enable ssh
     sudo systemctl start ssh
-    sudo sed -i 's/#PermitRootLogin.*/PermitRootLogin without-password/' /etc/ssh/sshd_config
-    sudo systemctl restart ssh
   SHELL
 
   config.vm.define "dbanfiSW" do |worker|

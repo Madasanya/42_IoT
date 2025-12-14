@@ -1,18 +1,19 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/jammy64"  # Ubuntu 22.04
+  config.vm.box = "generic/alpine319"  # Alpine Linux 3.19
 
   # Common provisioning for SSH setup (passwordless between VMs)
   config.vm.provision "shell", inline: <<-SHELL
-    sudo apt update -y
-    sudo apt install -y openssh-server net-tools
-    sudo systemctl enable ssh
-    sudo systemctl start ssh
+    apk update
+    apk add openssh net-tools bash
+    rc-update add sshd
+    rc-service sshd start
   SHELL
 
 
   config.vm.define "dbanfiS" do |server|
     server.vm.hostname = "dbanfiS"
     server.vm.network "private_network", ip: "192.168.56.110"
+    server.vm.synced_folder "./configs", "/home/vagrant/configs", type: "rsync"
     server.vm.provider "virtualbox" do |vb|
       vb.customize ["modifyvm", :id, "--name", "dbanfiS"]
       vb.memory = "1024"
