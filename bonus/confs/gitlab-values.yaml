@@ -1,0 +1,26 @@
+global:
+  edition: ce  # Or ee if licensed; use CE for free
+  hosts:
+    domain: local
+    https: false  # For simplicity; production use true
+  ingress:
+    configureCertmanager: false
+    class: traefik  # Use K3d's Traefik
+    enabled: true
+  minio:
+    enabled: true  # Built-in object storage
+  workhorse:
+    serviceName: webservice-default
+nginx-ingress:
+  enabled: false  # Don't install nginx-ingress, use existing traefik
+gitlab:
+  webservice:
+    replicas: 1
+redis:
+  replicas: 1
+  metrics:
+    enabled: false
+postgresql:
+  install: true  # Built-in DB
+  metrics:
+    enabled: false

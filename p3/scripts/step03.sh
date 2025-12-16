@@ -13,6 +13,8 @@ sudo kubectl port-forward svc/argocd-server -n argocd 8081:443 #(access at https
 #sudo argocd admin initial-password -n argocd #(login as admin).
 #Change password (best to skip and do in web UI)
 #sudo argocd account update-password
+#login via
+#sudo argocd login localhost:8081 --insecure
 
 # Verify installation (manually)
 # sudo kubectl get pods -n argocd #(all pods ready, e.g., argocd-server, argocd-application-controller).
