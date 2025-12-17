@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: app1
 spec:
-  replicas: 1  # Single replica
+  replicas: 1
   selector:
     matchLabels:
       app: app1
@@ -12,16 +12,49 @@ spec:
       labels:
         app: app1
     spec:
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app1-config
+
+      - name: html-volume
+        emptyDir: {}
+
+      initContainers:
+      - name: render-html
+        image: alpine:3.19
+        env:
+        - name: APP_NAME
+          value: app1
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: config-volume
+          mountPath: /template
+        - name: html-volume
+          mountPath: /work
+        command:
+        - /bin/sh
+        - -c
+        - |
+          sed \
+            -e "s/{{APP_NAME}}/${APP_NAME}/g" \
+            -e "s/{{POD_NAME}}/${POD_NAME}/g" \
+            -e "s/{{NODE_NAME}}/${NODE_NAME}/g" \
+            /template/index.html > /work/index.html
+
       containers:
       - name: nginx
         image: nginx:latest
         ports:
         - containerPort: 80
         volumeMounts:
-        - name: config-volume
+        - name: html-volume
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html
-      volumes:
-      - name: config-volume
-        configMap:
-          name: app1-config

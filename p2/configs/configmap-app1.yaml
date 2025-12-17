@@ -1,34 +1,36 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app1-config
+  name: app1-config          # Name of the ConfigMap (can be shared by multiple apps if used as a template)
 data:
-  index.html:
+  index.html: |              # HTML template stored as a multiline string
     <!DOCTYPE html>
     <html>
       <head>
         <title>Hello Kubernetes!</title>
+        <!-- Static assets; unchanged at runtime -->
         <link rel="stylesheet" type="text/css" href="/css/main.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300">
       </head>
       <body>
         <div class="main">
-          <img src="/images/kubernetes.png"/>
+          <img src="/images/kubernetes.png"/>   <!-- Static image -->
           <div class="content">
             <div id="message">
-              Hello from app1.
+              Hello from {{APP_NAME}}.          <!-- Replaced at pod startup (e.g. app1/app2/app3) -->
             </div>
           </div>
         </div>
+
         <div id="info">
           <table>
             <tr>
               <th>pod:</th>
-              <td>app-one-6bc974bc98-qtjj7</td>
+              <td>{{POD_NAME}}</td>              <!-- Injected via Downward API at runtime -->
             </tr>
             <tr>
               <th>node:</th>
-              <td>Linux (4.18.0-240.1.1.el8_3.x86_64)</td>
+              <td>{{NODE_NAME}}</td>             <!-- Injected via Downward API at runtime -->
             </tr>
           </table>
         </div>
