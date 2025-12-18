@@ -7,8 +7,10 @@ SHARED=/vagrant_shared
 USER=k3s-admin
 
 # Create non-root user
-useradd -m -s /bin/bash $USER
+adduser -D -s /bin/bash $USER
 echo "$USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER
+# Unlock the user account and set an empty password
+echo "$USER:" | sudo chpasswd
 
 sudo -i -u $USER
 
@@ -36,4 +38,5 @@ cat $SHARED/worker_id_rsa.pub >> /home/$USER/.ssh/authorized_keys
 
 echo "Touched server ready flag file"
 touch $SHARED/server_ready.txt
-
+sleep 10
+echo "Server setup complete."

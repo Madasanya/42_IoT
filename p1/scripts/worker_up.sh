@@ -7,10 +7,13 @@ USER=k3s-admin
 SERVER_IP=192.168.56.110
 
 # Create non-root user
-useradd -m -s /bin/bash $USER
+echo "Creating user $USER"
+adduser -D -s /bin/bash $USER
+echo "Add $USER to sudoers"
 echo "$USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USER
 
 # Create .ssh folder for the user
+echo "Creating .ssh folder for $USER"
 mkdir -p /home/$USER/.ssh
 chmod 700 /home/$USER/.ssh
 chown $USER:$USER /home/$USER/.ssh
