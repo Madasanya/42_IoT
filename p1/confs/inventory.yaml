@@ -1,0 +1,14 @@
+all:
+  vars:
+    ansible_user: vagrant
+    ansible_ssh_private_key_file: .vagrant/machines/{{ inventory_hostname }}/virtualbox/private_key
+    ansible_python_interpreter: /usr/bin/python3  # Use Python 3 on Alpine
+  children:
+    server:
+      hosts:
+        dbanfiS:
+          ansible_host: 192.168.56.110
+    agents:
+      hosts:
+        dbanfiSW:
+          ansible_host: 192.168.56.111
