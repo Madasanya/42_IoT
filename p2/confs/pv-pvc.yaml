@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shared-static-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: manual
+  hostPath:
+    path: /home/vagrant/confs/src
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-static-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi

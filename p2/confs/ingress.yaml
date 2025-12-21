@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web-ingress
+  name: apps-ingress
   annotations:
-    kubernetes.io/ingress.class: traefik  # K3s default
+    kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
   - host: app1.com

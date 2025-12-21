@@ -1,6 +1,4 @@
 /* css/main.css
-   Styles to match the screenshot: dark header with logo,
-   large centered jumbotron with "Hello from ...", and small info block.
 */
 
 @import url('https://fonts.googleapis.com/css?family=Ubuntu:300,400,700&display=swap');
@@ -25,46 +23,15 @@ html,body{
   -moz-osx-font-smoothing:grayscale;
 }
 
-/* top header with kube logo + wordmark */
-.header {
-  background: var(--header-bg);
-  border-bottom: 1px solid rgba(0,0,0,0.4);
-  padding: 18px 28px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;
-}
-.header img {
-  height: 46px;      /* logo size */
-  width: auto;
-  display:block;
-}
-.header .title {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-  color: #ffffff;
-  letter-spacing: 0.5px;
+/* main content image */
+.main img {
+  max-width: 150px;  /* adjust this value as needed */
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
-/* overall page container */
-.container {
-  max-width: 960px;
-  margin: 32px auto;
-  padding: 0 18px;
-}
-
-/* large center panel (jumbotron) */
-.jumbotron {
-  background: var(--panel-bg);
-  border: 1px solid var(--accent-border);
-  padding: 56px 30px;
-  text-align: center;
-  border-radius: 2px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  margin-bottom: 18px;
-}
 #message {
   font-size: 40px;
   font-weight: 300;
@@ -101,10 +68,6 @@ html,body{
 
 /* responsive tweaks */
 @media (max-width:640px){
-  .header { padding: 14px 12px; }
-  .header .title { font-size: 20px; }
-  .container { margin: 20px 12px; }
-  .jumbotron { padding: 28px 16px; }
   #message { font-size: 26px; }
   #info th { display:block; text-align:left; padding-bottom:4px; width:auto; color:var(--muted); }
 }

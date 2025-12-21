@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      volumes:
+        - name: shared-static
+          persistentVolumeClaim:
+            claimName: shared-static-pvc
+        - name: html-output
+          emptyDir: {}
+      initContainers:
+        - name: render-template
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              KERNEL_NAME=$(uname -s)
+              KERNEL_VERSION=$(uname -r)
+              KERNEL_ARCH=$(uname -m)
+              sed -e "s|__APP_NAME__|${APP_NAME}|g" \
+                  -e "s|__APP_MESSAGE__|${APP_MESSAGE}|g" \
+                  -e "s|__POD_NAME__|${POD_NAME}|g" \
+                  -e "s|__KERNEL_VERSION__|${KERNEL_NAME} \(${KERNEL_VERSION}\.${KERNEL_ARCH}\)|g" \
+                  /static-src/template/template.html > /html-output/index.html && \
+              cp -r /static-src/css /static-src/images /html-output/
+          env:
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app2-config
+                  key: APP_NAME
+            - name: APP_MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: app2-config
+                  key: APP_MESSAGE
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: shared-static
+              mountPath: /static-src
+              readOnly: true
+            - name: html-output
+              mountPath: /html-output
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-output
+              mountPath: /usr/share/nginx/html

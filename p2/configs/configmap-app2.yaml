@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app2-config
-data:
-  index.html: |
-    <html><body>Hello from app2.</body></html>

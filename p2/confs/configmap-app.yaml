@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app1-config
+data:
+  APP_NAME: "Application One"
+  APP_MESSAGE: "Hello from App 1!"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app2-config
+data:
+  APP_NAME: "Application Two"
+  APP_MESSAGE: "Welcome to App 2!"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app3-config
+data:
+  APP_NAME: "Application Three"
+  APP_MESSAGE: "Greetings from App 3!"

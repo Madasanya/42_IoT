@@ -1,10 +1,4 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app1-config          # Name of the ConfigMap (can be shared by multiple apps if used as a template)
-data:
-  index.html: |              # HTML template stored as a multiline string
-    <!DOCTYPE html>
+   <!DOCTYPE html>
     <html>
       <head>
         <title>Hello Kubernetes!</title>
@@ -17,7 +11,10 @@ data:
           <img src="/images/kubernetes.png"/>   <!-- Static image -->
           <div class="content">
             <div id="message">
-              Hello from {{APP_NAME}}.          <!-- Replaced at pod startup (e.g. app1/app2/app3) -->
+              Hello from __APP_NAME__.          <!-- Replaced at pod startup (e.g. app1/app2/app3) -->
+            </div>
+            <div id="info">
+              __APP_MESSAGE__
             </div>
           </div>
         </div>
@@ -26,11 +23,11 @@ data:
           <table>
             <tr>
               <th>pod:</th>
-              <td>{{POD_NAME}}</td>              <!-- Injected via Downward API at runtime -->
+              <td>__POD_NAME__</td>              <!-- Injected via Downward API at runtime -->
             </tr>
             <tr>
               <th>node:</th>
-              <td>{{NODE_NAME}}</td>             <!-- Injected via Downward API at runtime -->
+              <td>__KERNEL_VERSION__</td>             <!-- Injected via Shell command at runtime -->
             </tr>
           </table>
         </div>
