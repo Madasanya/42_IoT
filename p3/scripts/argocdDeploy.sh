@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Check if ArgoCD port-forward is running, if not warn the user
-if ! curl -sk https://localhost:8081 >/dev/null 2>&1; then
-  echo "WARNING: ArgoCD is not accessible at localhost:8081"
-  #echo "Starting port-forward to ArgoCD..."
-  #sudo kubectl port-forward svc/argocd-server -n argocd 8081:443 >/dev/null 2>&1 &
-  #ARGOCD_PORT_FORWARD_PID=$!
-  #sleep 3
-fi
-
 # Create the dev namespace where the application will be deployed
 sudo kubectl create namespace dev 2>/dev/null || echo "Namespace 'dev' already exists"
 
@@ -63,9 +54,7 @@ SERVICE_PORT=$(sudo kubectl get svc -n dev -o jsonpath='{.items[0].spec.ports[0]
 
 if [ -n "$SERVICE_NAME" ] && [ -n "$SERVICE_PORT" ]; then
   echo "=== Setting up port-forward to $SERVICE_NAME on port $SERVICE_PORT -> $SERVICE_PORT ==="
-  #sudo kubectl port-forward svc/$SERVICE_NAME -n dev $SERVICE_PORT:$SERVICE_PORT >/dev/null 2>&1 &
-  nohup /home/mamuller/42_IoT/p3/scripts/portForward.sh dev $SERVICE_NAME $SERVICE_PORT:$SERVICE_PORT > /home/mamuller/42_IoT/p3/scripts/playground-portforward.log 2>&1 &
-  APP_PORT_FORWARD_PID=$!
+  nohup /home/mamuller/42_IoT/p3/scripts/portForward.sh dev $SERVICE_NAME $SERVICE_PORT:$SERVICE_PORT > ./logs/playground-portforward.log 2>&1 &
   
   # Wait for port-forward to be fully established
   echo "Waiting for port-forward to be ready..."
@@ -87,17 +76,6 @@ if [ -n "$SERVICE_NAME" ] && [ -n "$SERVICE_PORT" ]; then
   curl -s http://localhost:$SERVICE_PORT
   echo ""
   
-  echo ""
-  echo "Application is accessible at http://localhost:$SERVICE_PORT"
-  echo "Press Ctrl+C to stop port-forwarding and exit"
-  
-  # Wait for user to stop
-  wait $APP_PORT_FORWARD_PID
 else
   echo "No service found to test"
-fi
-
-# Cleanup ArgoCD port-forward if we started it
-if [ -n "$ARGOCD_PORT_FORWARD_PID" ]; then
-  kill $ARGOCD_PORT_FORWARD_PID 2>/dev/null
 fi
