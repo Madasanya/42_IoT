@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 ########### STEP 1: PREREQUISITES INSTALLATION ###########
 # Make setup script executable and run it to install prerequisites
 # Verification commands to confirm installations
@@ -34,3 +36,5 @@ sudo kubectl get pods -n argocd #(all pods ready, e.g., argocd-server, argocd-ap
 ########### STEP 4: DEPLOY APPLICATION VIA ArgoCD ###########
 chmod +x ./argocdDeploy.sh
 bash ./argocdDeploy.sh
+
+cd "$SCRIPT_DIR" || exit 1
