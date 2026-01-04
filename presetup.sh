@@ -38,6 +38,22 @@ if ! command -v kubectl &> /dev/null; then
     fi
 fi
 
+# Rerouting
+# The line to add
+LINE="192.168.56.110 app1.com app2.com app3.com"
+
+# Path to hosts file
+HOSTS_FILE="/etc/hosts"
+
+# Check if the exact line already exists (using grep -Fx for fixed string and exact line match)
+if grep -Fx "$LINE" "$HOSTS_FILE" > /dev/null; then
+    echo "The line $LINE  already exists in $HOSTS_FILE. No changes made."
+else
+    # Append the line (requires sudo for /etc/hosts)
+    echo "$LINE" | sudo tee -a "$HOSTS_FILE" > /dev/null
+    echo "$LINE added to $HOSTS_FILE."
+fi
+
 #################### P3 ################
 
 # Install Docker and prequisits (prerequisite for K3d)

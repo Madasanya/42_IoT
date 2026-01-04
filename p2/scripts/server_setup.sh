@@ -15,7 +15,7 @@ curl -sfL https://get.k3s.io | sudo INSTALL_K3S_EXEC="server --node-ip=192.168.5
 # Wait for K3s to be fully initialized and generate its configuration file
 # The config file is needed to interact with the cluster using kubectl
 echo "Waiting for K3s to be ready..."
-timeout=30
+timeout=120
 while [ ! -f /etc/rancher/k3s/k3s.yaml ] && [ $timeout -gt 0 ]; do
   sleep 2
   timeout=$((timeout - 2))
@@ -51,7 +51,7 @@ sudo ln -s /usr/local/bin/kubectl /usr/local/bin/k
 # K3s includes Traefik by default, but it takes time to start
 # Traefik is needed to route external HTTP traffic to our applications
 echo "Waiting for Traefik service..."
-timeout=60
+timeout=120
 while ! kubectl get svc traefik -n kube-system &>/dev/null; do
   if [ $timeout -le 0 ]; then
     echo "Timeout waiting for Traefik service"
