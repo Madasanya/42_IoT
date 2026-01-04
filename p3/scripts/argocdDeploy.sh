@@ -14,7 +14,7 @@ fi
 sudo argocd login localhost:8081 --insecure --username admin --password "$ARGOCD_PASSWORD"
 
 # Create the ArgoCD application from the configuration file
-sudo kubectl apply -f /home/mamuller/42_IoT/p3/confs/application.yaml
+sudo kubectl apply -f $PWD/../confs/application.yaml
 
 # Wait a moment for the application to be registered
 sleep 5
@@ -54,7 +54,7 @@ SERVICE_PORT=$(sudo kubectl get svc -n dev -o jsonpath='{.items[0].spec.ports[0]
 
 if [ -n "$SERVICE_NAME" ] && [ -n "$SERVICE_PORT" ]; then
   echo "=== Setting up port-forward to $SERVICE_NAME on port $SERVICE_PORT -> $SERVICE_PORT ==="
-  nohup /home/mamuller/42_IoT/p3/scripts/portForward.sh dev $SERVICE_NAME $SERVICE_PORT:$SERVICE_PORT > ./logs/playground-portforward.log 2>&1 &
+  nohup  $PWD/portForward.sh dev $SERVICE_NAME $SERVICE_PORT:$SERVICE_PORT >  $PWD/logs/playground-portforward.log 2>&1 &
   
   # Wait for port-forward to be fully established
   echo "Waiting for port-forward to be ready..."

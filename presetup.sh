@@ -62,7 +62,7 @@ if ! command -v docker &> /dev/null; then
     sudo mkdir -p /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     sudo usermod -aG docker $USER  # Add user to docker group (log out/in to apply)
 else
     echo "Docker already installed"
@@ -81,7 +81,6 @@ if ! command -v argocd &> /dev/null; then
     curl -fsSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-amd64
     sudo install -m 755 argocd-linux-amd64 /usr/local/bin/argocd
     rm argocd-linux-amd64
-    mkdir -p logs
 else
     echo "argocd already installed"
 fi

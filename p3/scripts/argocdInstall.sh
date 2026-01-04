@@ -21,7 +21,7 @@ echo "Initial ArgoCD password: $ARGOCD_PASSWORD"
 
 # Forward the port in the background and suppress all output
 #sudo kubectl port-forward svc/argocd-server -n argocd 8081:443 >/dev/null 2>&1 &
-nohup /home/mamuller/42_IoT/p3/scripts/portForward.sh argocd argocd-server 8081:443 > ./logs/argocd-portforward.log 2>&1 &
+nohup  $PWD/portForward.sh argocd argocd-server 8081:443 >  $PWD/logs/argocd-portforward.log 2>&1 &
 PORT_FORWARD_PID=$!
 
 # Wait for port forwarding to be ready
