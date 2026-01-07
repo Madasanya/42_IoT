@@ -1,22 +1,16 @@
 #!/bin/bash
 
+# Load credentials from .env file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/.env" ]; then
+  source "$SCRIPT_DIR/.env"
+else
+  echo "Error: .env file not found in $SCRIPT_DIR"
+  exit 1
+fi
+
 # Create the dev namespace where the application will be deployed
 sudo kubectl create namespace dev 2>/dev/null || echo "Namespace 'dev' already exists"
-
-# Retrieve ArgoCD admin password - try secret first, then prompt
-if [ -z "$ARGOCD_PASSWORD" ]; then
-  echo "Attempting to retrieve ArgoCD admin password from Kubernetes secret..."
-  ARGOCD_PASSWORD=$(sudo kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null)
-  
-  if [ -z "$ARGOCD_PASSWORD" ]; then
-    echo "⚠ Could not retrieve password from secret (may have been reset)"
-    echo "Please enter ArgoCD admin password:"
-    read -s -r ARGOCD_PASSWORD
-    echo
-  else
-    echo "✓ ArgoCD password retrieved from secret"
-  fi
-fi
 
 # Login to ArgoCD
 echo "Logging into ArgoCD..."
@@ -24,18 +18,8 @@ LOGIN_OUTPUT=$(sudo argocd login localhost:8081 --insecure --username admin --pa
 LOGIN_EXIT=$?
 
 if [ $LOGIN_EXIT -ne 0 ]; then
-  echo "✗ Login failed with retrieved password"
-  echo "Please enter ArgoCD admin password:"
-  read -s -r ARGOCD_PASSWORD
-  echo
-  
-  echo "Retrying login..."
-  sudo argocd login localhost:8081 --insecure --username admin --password "$ARGOCD_PASSWORD"
-  
-  if [ $? -ne 0 ]; then
-    echo "✗ ArgoCD login failed"
-    exit 1
-  fi
+  echo "✗ ArgoCD login failed"
+  exit 1
 fi
 
 echo "✓ Successfully logged into ArgoCD"

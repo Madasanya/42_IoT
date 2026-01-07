@@ -1,38 +1,18 @@
 #!/bin/bash
 set -e
 
+# Load credentials from .env file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/.env" ]; then
+  source "$SCRIPT_DIR/.env"
+  PASSWORD="$GITLAB_PASSWORD"
+else
+  echo "Error: .env file not found in $SCRIPT_DIR"
+  exit 1
+fi
+
 echo "=== GitLab Root Password Setup ==="
-
-while true; do
-    echo "Please set a strong password for the GitLab 'root' user."
-    echo "Requirements:"
-    echo "  - Minimum 8 characters"
-    echo "  - Only printable basic characters (letters, numbers, !@#$%^&*()_+-= etc.)"
-    echo "  - No spaces or control characters"
-    read -s -p "Enter password: " PASSWORD
-    echo
-    read -s -p "Confirm password: " PASSWORD_CONFIRM
-    echo
-
-    if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
-        echo "Error: Passwords do not match. Try again."
-        continue
-    fi
-
-    if [ ${#PASSWORD} -lt 8 ]; then
-        echo "Error: Password must be at least 8 characters long."
-        continue
-    fi
-
-    # Check for only printable basic ASCII (32-126)
-    if [[ "$PASSWORD" =~ [^[:print:]] || "$PASSWORD" =~ [[:cntrl:]] ]]; then
-        echo "Error: Password contains invalid characters (only basic printable ASCII allowed)."
-        continue
-    fi
-
-    echo "Password accepted!"
-    break
-done
+echo "Using password from .env file"
 
 echo "Creating namespace and pre-defined root password secret..."
 

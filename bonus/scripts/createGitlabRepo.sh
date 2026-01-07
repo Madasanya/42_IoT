@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+# Load credentials from .env file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/.env" ]; then
+  source "$SCRIPT_DIR/.env"
+  ROOT_PASSWORD="$GITLAB_PASSWORD"
+else
+  echo "Error: .env file not found in $SCRIPT_DIR"
+  exit 1
+fi
+
 # Variables
 PROJECT_NAME="dbanfi_playground"
 MANIFESTS_DIR="../manifests"
@@ -12,9 +22,6 @@ echo "GitLab Repository Setup"
 echo "========================================="
 echo
 echo "This script will create a GitLab project and push your manifests."
-echo
-read -s -p "Enter GitLab root password: " ROOT_PASSWORD
-echo
 echo
 
 echo "Waiting for GitLab to be ready..."
