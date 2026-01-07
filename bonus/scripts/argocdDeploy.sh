@@ -3,15 +3,42 @@
 # Create the dev namespace where the application will be deployed
 sudo kubectl create namespace dev 2>/dev/null || echo "Namespace 'dev' already exists"
 
-# Login to ArgoCD (using the password set in step03)
-# If ARGOCD_PASSWORD environment variable is not set, prompt for it
+# Retrieve ArgoCD admin password - try secret first, then prompt
 if [ -z "$ARGOCD_PASSWORD" ]; then
-  echo "Enter ArgoCD admin password:"
-  read -s ARGOCD_PASSWORD
-  echo
+  echo "Attempting to retrieve ArgoCD admin password from Kubernetes secret..."
+  ARGOCD_PASSWORD=$(sudo kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null)
+  
+  if [ -z "$ARGOCD_PASSWORD" ]; then
+    echo "⚠ Could not retrieve password from secret (may have been reset)"
+    echo "Please enter ArgoCD admin password:"
+    read -s -r ARGOCD_PASSWORD
+    echo
+  else
+    echo "✓ ArgoCD password retrieved from secret"
+  fi
 fi
 
-sudo argocd login localhost:8081 --insecure --username admin --password "$ARGOCD_PASSWORD"
+# Login to ArgoCD
+echo "Logging into ArgoCD..."
+LOGIN_OUTPUT=$(sudo argocd login localhost:8081 --insecure --username admin --password "$ARGOCD_PASSWORD" 2>&1)
+LOGIN_EXIT=$?
+
+if [ $LOGIN_EXIT -ne 0 ]; then
+  echo "✗ Login failed with retrieved password"
+  echo "Please enter ArgoCD admin password:"
+  read -s -r ARGOCD_PASSWORD
+  echo
+  
+  echo "Retrying login..."
+  sudo argocd login localhost:8081 --insecure --username admin --password "$ARGOCD_PASSWORD"
+  
+  if [ $? -ne 0 ]; then
+    echo "✗ ArgoCD login failed"
+    exit 1
+  fi
+fi
+
+echo "✓ Successfully logged into ArgoCD"
 
 # Generate GitLab access token for ArgoCD
 echo "Generating GitLab access token for ArgoCD..."
@@ -46,7 +73,11 @@ sudo argocd repo add http://gitlab-webservice-default.gitlab.svc:8181/root/dbanf
   --password "$GITLAB_TOKEN" \
   --insecure-skip-server-verification
 
-echo "✓ Repository added to ArgoCD"
+if [ $? -ne 0 ]; then
+  echo "⚠ Repository add command returned an error, but it may already be added"
+else
+  echo "✓ Repository added to ArgoCD"
+fi
 
 # Create the ArgoCD application from the configuration file
 echo "Create ArgoCD application for playground app..."
@@ -59,9 +90,18 @@ sleep 5
 echo "Syncing ArgoCD application to deploy playground app..."
 sudo argocd app sync playground-app
 
+if [ $? -ne 0 ]; then
+  echo "⚠ Sync command returned an error, checking application status..."
+fi
+
 # Wait for the deployment to complete
 echo "Waiting for ArgoCD application to be healthy and synced..."
 sudo argocd app wait playground-app --timeout 300
+
+if [ $? -ne 0 ]; then
+  echo "⚠ Application may not be fully synced yet, checking manually..."
+  sudo argocd app get playground-app
+fi
 
 # Display cluster status
 echo "=== Namespaces ==="
@@ -77,8 +117,8 @@ sudo kubectl get svc -n dev
 RESOURCE_COUNT=$(sudo kubectl get all -n dev --no-headers 2>/dev/null | wc -l)
 if [ "$RESOURCE_COUNT" -eq 0 ]; then
   echo "WARNING: No resources found in dev namespace!"
-  echo "The GitHub repository may be empty or contain no Kubernetes manifests."
-  echo "Check the repository: https://github.com/mr-bammby/dbanfi_playground.git"
+  echo "The GitLab repository may be empty or contain no Kubernetes manifests."
+  echo "Check the repository: http://localhost:8082/root/dbanfi_playground"
   exit 1
 fi
 
