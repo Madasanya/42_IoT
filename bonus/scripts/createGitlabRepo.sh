@@ -109,20 +109,43 @@ fi
 
 echo "Cloning repository..."
 rm -rf "$TMP_DIR"
-git clone "http://root:$TOKEN@localhost:8082/root/$PROJECT_NAME.git" "$TMP_DIR"
+
+# Run git commands as actual user if using sudo
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+  sudo -u "$SUDO_USER" git clone "http://root:$TOKEN@localhost:8082/root/$PROJECT_NAME.git" "$TMP_DIR"
+else
+  git clone "http://root:$TOKEN@localhost:8082/root/$PROJECT_NAME.git" "$TMP_DIR"
+fi
 
 echo "Copying manifests..."
 cp "$MANIFESTS_DIR"/deployment.yaml "$MANIFESTS_DIR"/service.yaml "$TMP_DIR/"
 
+# Fix ownership of copied files if running with sudo
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+  chown -R "$SUDO_USER:$SUDO_USER" "$TMP_DIR"
+  echo "✓ Repository ownership set to $SUDO_USER"
+fi
+
 cd "$TMP_DIR"
 echo "Configuring git user..."
-git config user.email "admin@example.com"
-git config user.name "Administrator"
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+  sudo -u "$SUDO_USER" git config user.email "admin@example.com"
+  sudo -u "$SUDO_USER" git config user.name "Administrator"
+else
+  git config user.email "admin@example.com"
+  git config user.name "Administrator"
+fi
 
 echo "Committing and pushing initial v1..."
-git add .
-git commit -m "Initial v1 deployment (playground app)"
-git push origin main || git push origin master:main
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+  sudo -u "$SUDO_USER" git add .
+  sudo -u "$SUDO_USER" git commit -m "Initial v1 deployment (playground app)"
+  sudo -u "$SUDO_USER" git push origin main || sudo -u "$SUDO_USER" git push origin master:main
+else
+  git add .
+  git commit -m "Initial v1 deployment (playground app)"
+  git push origin main || git push origin master:main
+fi
 
 echo
 echo "========================================="
