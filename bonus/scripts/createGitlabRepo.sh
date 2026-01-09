@@ -37,31 +37,7 @@ done
 echo "Verifying root user namespace setup..."
 TOOLBOX_POD=$(sudo kubectl get pod -n gitlab -l app=toolbox -o jsonpath='{.items[0].metadata.name}')
 
-sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "
-user = User.find_by_username('root')
-if user.nil?
-  puts '✗ ERROR: Root user not found!'
-  exit 1
-end
-
-# Check if namespace exists - it may not be immediately linked
-if user.namespace.nil?
-  puts '⚠ Root user namespace not linked yet'
-  puts '  Checking for existing root namespace...'
-  
-  # Find the namespace that should belong to root
-  ns = Namespace.find_by(path: 'root')
-  if ns
-    puts '✓ Root namespace exists in database'
-    puts '  The user can still create projects via API'
-  else
-    puts '✗ ERROR: No root namespace found in database'
-    exit 1
-  end
-else
-  puts '✓ Root user namespace verified: ' + user.namespace.path
-end
-" || {
+sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "$(cat $PWD/verify_root_namespace.rb)" || {
   echo "⚠ Namespace verification had issues, but continuing..."
   echo "  The API may still work for creating projects"
 }

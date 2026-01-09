@@ -1,0 +1,3 @@
+# .env file for bonus
+ARGOCD_PASSWORD=
+GITLAB_PASSWORD=
