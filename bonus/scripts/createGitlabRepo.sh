@@ -67,20 +67,7 @@ end
 }
 
 echo "Generating Personal Access Token for API..."
-TOKEN=$(sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "
-user = User.find_by_username('root')
-token = user.personal_access_tokens.create(
-  name: 'automation-token-' + Time.now.to_i.to_s,
-  scopes: [:api, :write_repository, :read_repository],
-  expires_at: 365.days.from_now
-)
-if token.persisted?
-  puts token.token
-else
-  STDERR.puts 'Token creation failed: ' + token.errors.full_messages.join(', ')
-  exit 1
-end
-" 2>&1 | grep -E '^glpat-')
+TOKEN=$(sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "$(cat $PWD/create_gitlab_token.rb)" automation-token api,write_repository,read_repository 2>&1 | grep -E '^glpat-')
 
 if [ -z "$TOKEN" ] || ! echo "$TOKEN" | grep -q "^glpat-"; then
   echo "✗ Failed to generate access token"

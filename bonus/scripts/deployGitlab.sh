@@ -23,6 +23,25 @@ sudo kubectl create secret generic gitlab-gitlab-initial-root-password \
   --from-literal=password="$PASSWORD" \
   --dry-run=client -o yaml | sudo kubectl apply -f -
 
+echo "Pre-pulling critical GitLab images to avoid timeout issues..."
+echo "This may take several minutes depending on network speed..."
+GITLAB_VERSION="v18.7.1"
+CRITICAL_IMAGES=(
+  "registry.gitlab.com/gitlab-org/build/cng/gitlab-webservice-ce:${GITLAB_VERSION}"
+  "registry.gitlab.com/gitlab-org/build/cng/gitlab-toolbox-ce:${GITLAB_VERSION}"
+  "registry.gitlab.com/gitlab-org/build/cng/gitlab-sidekiq-ce:${GITLAB_VERSION}"
+  "registry.gitlab.com/gitlab-org/build/cng/gitaly:${GITLAB_VERSION}"
+  "registry.gitlab.com/gitlab-org/build/cng/gitlab-shell:${GITLAB_VERSION}"
+)
+
+for image in "${CRITICAL_IMAGES[@]}"; do
+  echo "Pulling $image..."
+  if ! sudo k3d image import "$image" -c mycluster 2>/dev/null; then
+    # If k3d import fails, try direct docker pull
+    docker pull "$image" 2>/dev/null || echo "Warning: Failed to pre-pull $image"
+  fi
+done
+
 echo "Deploying GitLab with your custom root password..."
 helm repo add gitlab https://charts.gitlab.io/ 2>/dev/null || helm repo add gitlab https://charts.gitlab.io/ --force-update
 helm repo update
@@ -31,10 +50,11 @@ helm upgrade --install gitlab gitlab/gitlab \
   --values ../confs/gitlab-values.yaml \
   --set global.initialRootPassword.secret=gitlab-gitlab-initial-root-password \
   --set global.initialRootPassword.key=password \
-  --timeout 30m
+  --set imagePullPolicy=IfNotPresent \
+  --timeout 60m
 
-echo "Waiting for GitLab webservice rollout..."
-sudo kubectl rollout status deployment/gitlab-webservice-default -n gitlab --timeout=20m
+echo "Waiting for GitLab webservice rollout (this may take a while due to image pulls)..."
+sudo kubectl rollout status deployment/gitlab-webservice-default -n gitlab --timeout=60m
 
 echo "Waiting for GitLab to fully initialize (this may take a few minutes)..."
 sleep 60

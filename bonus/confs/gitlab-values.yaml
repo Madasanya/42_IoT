@@ -11,11 +11,25 @@ global:
     enabled: true  # Built-in object storage
   workhorse:
     serviceName: webservice-default
+  # Reduce components for faster deployment
+  kas:
+    enabled: false  # Disable Kubernetes Agent Server
+  registry:
+    enabled: false  # Disable container registry for faster startup
 nginx-ingress:
   enabled: false  # Don't install nginx-ingress, use existing traefik
 gitlab:
   webservice:
     replicas: 1
+    resources:
+      requests:
+        memory: 1.5G
+        cpu: 500m
+  sidekiq:
+    resources:
+      requests:
+        memory: 1G
+        cpu: 300m
 redis:
   replicas: 1
   metrics:
@@ -24,3 +38,7 @@ postgresql:
   install: true  # Built-in DB
   metrics:
     enabled: false
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
