@@ -1,3 +1,8 @@
+# Color codes for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 #!/bin/bash
 set -e
 
@@ -7,7 +12,7 @@ if [ -f "$SCRIPT_DIR/.env" ]; then
   source "$SCRIPT_DIR/.env"
   PASSWORD="$GITLAB_PASSWORD"
 else
-  echo "Error: .env file not found in $SCRIPT_DIR"
+  echo -e "${RED}Error: .env file not found in $SCRIPT_DIR${NC}"
   exit 1
 fi
 
@@ -35,10 +40,9 @@ CRITICAL_IMAGES=(
 )
 
 for image in "${CRITICAL_IMAGES[@]}"; do
-  echo "Pulling $image..."
+  echo -e "${YELLOW}Pulling $image...${NC}"
   if ! sudo k3d image import "$image" -c mycluster 2>/dev/null; then
-    # If k3d import fails, try direct docker pull
-    docker pull "$image" 2>/dev/null || echo "Warning: Failed to pre-pull $image"
+    docker pull "$image" 2>/dev/null || echo -e "${YELLOW}Warning: Failed to pre-pull $image${NC}"
   fi
 done
 
@@ -67,9 +71,9 @@ sudo kubectl cp "$SCRIPT_DIR/setup_root_user.rb" gitlab/$TOOLBOX_POD:/tmp/setup_
 sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner /tmp/setup_root_user.rb
 
 if [ $? -eq 0 ]; then
-  echo "✓ Root user setup completed"
+  echo -e "${GREEN}Root user setup completed${NC}"
 else
-  echo "✗ Root user creation failed"
+  echo -e "${RED}Root user creation failed${NC}"
   exit 1
 fi
 
@@ -86,7 +90,7 @@ sleep 5
 
 echo
 echo "========================================="
-echo "GitLab deployed successfully!"
+echo -e "${YELLOW}=========================================${NC}"
 echo "========================================="
 echo "Credentials:"
 echo "  URL: http://localhost:8082"
@@ -94,5 +98,5 @@ echo "  Username: root"
 echo "  Password: [the password you set earlier]"
 echo
 echo "Port-forward started automatically in background."
-echo "You can now log in to GitLab!"
+echo -e "${YELLOW}Port-forward started automatically in background.${NC}"
 echo "========================================="

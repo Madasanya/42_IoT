@@ -1,10 +1,15 @@
+# Color codes for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 #!/bin/bash
 set -e
 
 # Load credentials from .env file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/.env" ]; then
-  source "$SCRIPT_DIR/.env"
+  source "$SCRIPT_DIR/.env" 
   ROOT_PASSWORD="$GITLAB_PASSWORD"
 else
   echo "Error: .env file not found in $SCRIPT_DIR"
@@ -17,20 +22,20 @@ MANIFESTS_DIR="../manifests"
 TMP_DIR="/tmp/gitlab-repo-$PROJECT_NAME"
 GITLAB_URL="http://localhost:8082"
 
-echo "========================================="
+echo -e "${YELLOW}=========================================${NC}"
 echo "GitLab Repository Setup"
-echo "========================================="
+echo -e "${YELLOW}=========================================${NC}"
 echo
-echo "This script will create a GitLab project and push your manifests."
+echo -e "${YELLOW}This script will create a GitLab project and push your manifests.${NC}"
 echo
 
 echo "Waiting for GitLab to be ready..."
 for i in {1..30}; do
   if curl -s -o /dev/null -w "%{http_code}" "$GITLAB_URL" | grep -q "200\|302"; then
-    echo "✓ GitLab is ready!"
+    echo -e "${GREEN}GitLab is ready!${NC}"
     break
   fi
-  echo "Attempt $i/30: Waiting for GitLab..."
+  echo -e "${YELLOW}Attempt $i/30: Waiting for GitLab...${NC}"
   sleep 2
 done
 
@@ -38,19 +43,19 @@ echo "Verifying root user namespace setup..."
 TOOLBOX_POD=$(sudo kubectl get pod -n gitlab -l app=toolbox -o jsonpath='{.items[0].metadata.name}')
 
 sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "$(cat $PWD/verify_root_namespace.rb)" || {
-  echo "⚠ Namespace verification had issues, but continuing..."
-  echo "  The API may still work for creating projects"
+  echo -e "${YELLOW}Namespace verification had issues, but continuing...${NC}"
+  echo -e "${YELLOW}The API may still work for creating projects${NC}"
 }
 
 echo "Generating Personal Access Token for API..."
 TOKEN=$(sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner "$(cat $PWD/create_gitlab_token.rb)" automation-token api,write_repository,read_repository 2>&1 | grep -E '^glpat-')
 
 if [ -z "$TOKEN" ] || ! echo "$TOKEN" | grep -q "^glpat-"; then
-  echo "✗ Failed to generate access token"
+  echo -e "${RED}Failed to generate access token${NC}"
   exit 1
 fi
 
-echo "✓ Access token generated"
+echo -e "${GREEN}Access token generated${NC}"
 
 echo "Creating project '$PROJECT_NAME'..."
 # Use token-based authentication for API
@@ -61,11 +66,11 @@ RESPONSE=$(curl -s -w "\n%{http_code}" -H "PRIVATE-TOKEN: $TOKEN" -X POST "$GITL
 HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
 
 if [ "$HTTP_CODE" = "201" ]; then
-  echo "✓ Project created successfully!"
+  echo -e "${GREEN}Project created successfully!${NC}"
 elif [ "$HTTP_CODE" = "400" ]; then
-  echo "⚠ Project may already exist, continuing..."
+  echo -e "${YELLOW}Project may already exist, continuing...${NC}"
 else
-  echo "✗ API call returned HTTP $HTTP_CODE"
+  echo -e "${RED}API call returned HTTP $HTTP_CODE${NC}"
   echo "$RESPONSE" | head -n-1
   exit 1
 fi
@@ -86,7 +91,7 @@ cp "$MANIFESTS_DIR"/deployment.yaml "$MANIFESTS_DIR"/service.yaml "$TMP_DIR/"
 # Fix ownership of copied files if running with sudo
 if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
   chown -R "$SUDO_USER:$SUDO_USER" "$TMP_DIR"
-  echo "✓ Repository ownership set to $SUDO_USER"
+  echo -e "${GREEN}Repository ownership set to $SUDO_USER${NC}"
 fi
 
 cd "$TMP_DIR"
@@ -111,8 +116,8 @@ else
 fi
 
 echo
-echo "========================================="
-echo "✓ Repository created and manifests pushed!"
-echo "========================================="
+echo -e "${YELLOW}=========================================${NC}"
+echo "Repository created and manifests pushed!"
+echo -e "${YELLOW}=========================================${NC}"
 echo "Repository URL: $GITLAB_URL/root/$PROJECT_NAME"
 echo

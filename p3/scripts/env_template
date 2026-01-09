@@ -1,0 +1,3 @@
+# .env file for p3
+# Set your ArgoCD admin password here (must be exactly 8 alphanumeric characters)
+ARGOCD_PASSWORD=
