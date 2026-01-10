@@ -38,15 +38,6 @@ sudo argocd app sync playground-app
 sudo argocd app wait playground-app --timeout 300
 
 # Display cluster status
-echo "=== Namespaces ==="
-sudo kubectl get ns
-
-echo "=== Pods in dev namespace ==="
-sudo kubectl get pods -n dev
-
-echo "=== Services in dev namespace ==="
-sudo kubectl get svc -n dev
-# Display cluster status
 echo -e "${YELLOW}=== Namespaces ===${NC}"
 sudo kubectl get ns
 

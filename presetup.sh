@@ -35,6 +35,7 @@ if ! command -v kubectl &> /dev/null; then
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         echo "kubectl installed successfully."
         rm -f kubectl kubectl.sha256
+        sudo ln -s /usr/local/bin/kubectl /usr/local/bin/k
     else
         # If hash does not match, print an error and exit
         echo "Error: The checksum of kubectl does not match the expected value!"

@@ -3,10 +3,6 @@ set -e  # Exit on any error
 
 mkdir -p logs
 
-echo "========================================"
-echo "Inception-of-Things (IoT) Bonus Master Setup"
-echo "Version: 3.1 - January 2026"
-echo "========================================"
 # Color codes
 GREEN='\033[0;32m'
 RED='\033[0;31m'
