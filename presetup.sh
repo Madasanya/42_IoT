@@ -6,11 +6,14 @@ sudo apt update
 # Install curl
 sudo apt install -y curl
 
-# Add HashiCorp GPG Key and Repository for vagrant and isntall vagrant
+# Add HashiCorp GPG Key and Repository for vagrant and install vagrant
 if ! command -v vagrant &> /dev/null; then
     curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
     sudo apt update && sudo apt install -y vagrant
+    # Remove HashiCorp keyring and list after install
+    sudo rm -f /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    sudo rm -f /etc/apt/sources.list.d/hashicorp.list
 else
     echo "Vagrant is already installed"
 fi
@@ -31,6 +34,7 @@ if ! command -v kubectl &> /dev/null; then
         # If hash matches, install kubectl
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         echo "kubectl installed successfully."
+        rm -f kubectl kubectl.sha256
     else
         # If hash does not match, print an error and exit
         echo "Error: The checksum of kubectl does not match the expected value!"
@@ -57,7 +61,7 @@ fi
 
 #################### P3 ################
 
-# Install Docker and prequisits (prerequisite for K3d)
+# Install Docker and prerequisites (prerequisite for K3d)
 if ! command -v docker &> /dev/null; then
     sudo apt install -y ca-certificates gnupg lsb-release
     sudo mkdir -p /etc/apt/keyrings
@@ -65,6 +69,9 @@ if ! command -v docker &> /dev/null; then
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     sudo usermod -aG docker $USER  # Add user to docker group (log out/in to apply)
+    # Remove Docker keyring and list after install
+    sudo rm -f /etc/apt/keyrings/docker.gpg
+    sudo rm -f /etc/apt/sources.list.d/docker.list
 else
     echo "Docker already installed"
 fi

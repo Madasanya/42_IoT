@@ -1,10 +1,11 @@
+#!/bin/bash
+set -e
+
 # Color codes for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
-#!/bin/bash
-set -e
 
 # Load credentials from .env file
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -41,7 +42,7 @@ CRITICAL_IMAGES=(
 
 for image in "${CRITICAL_IMAGES[@]}"; do
   echo -e "${YELLOW}Pulling $image...${NC}"
-  if ! sudo k3d image import "$image" -c mycluster 2>/dev/null; then
+  if ! sudo k3d image import "$image" -c dbanfiC 2>/dev/null; then
     docker pull "$image" 2>/dev/null || echo -e "${YELLOW}Warning: Failed to pre-pull $image${NC}"
   fi
 done

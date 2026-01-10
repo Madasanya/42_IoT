@@ -1,11 +1,10 @@
+#!/bin/bash
 
 # Color codes for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
-#!/bin/bash
-
 
 # Create the dev namespace where the application will be deployed
 sudo kubectl create namespace dev 2>/dev/null || echo -e "${YELLOW}Namespace 'dev' already exists${NC}"
