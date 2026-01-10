@@ -1,5 +1,8 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/alpine319"  # Alpine Linux 3.19
+  # Dynamically fetch latest Alpine version
+  alpine_box = `bash ./scripts/get_latest_alpine.sh`.strip
+  alpine_box = "generic/alpine319" if alpine_box.empty?  # Fallback
+  config.vm.box = alpine_box
   config.vm.box_check_update = false
   config.vm.provision "shell", path: "./scripts/setup.sh"
 
