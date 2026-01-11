@@ -32,6 +32,15 @@
     node_ip: 192.168.56.111
     server_node_ip: 192.168.56.110
   tasks:
+    - name: Install K3s agent
+      shell: |
+        curl -sfL https://get.k3s.io | \
+        K3S_URL=https://{{ server_node_ip }}:6443 \
+        K3S_TOKEN={{ hostvars['dbanfiS'].k3s_token }} \
+        INSTALL_K3S_EXEC="--node-ip={{ node_ip }}" sh -
+      args:
+        creates: /usr/local/bin/k3s
+        
     - name: Configure network interfaces
       copy:
         content: |
@@ -57,12 +66,3 @@
     - name: Wait for network to be ready
       pause:
         seconds: 3
-
-    - name: Install K3s agent
-      shell: |
-        curl -sfL https://get.k3s.io | \
-        K3S_URL=https://{{ server_node_ip }}:6443 \
-        K3S_TOKEN={{ hostvars['dbanfiS'].k3s_token }} \
-        INSTALL_K3S_EXEC="--node-ip={{ node_ip }}" sh -
-      args:
-        creates: /usr/local/bin/dbanfiSW
