@@ -40,7 +40,7 @@
         INSTALL_K3S_EXEC="--node-ip={{ node_ip }}" sh -
       args:
         creates: /usr/local/bin/k3s
-        
+
     - name: Configure network interfaces
       copy:
         content: |
@@ -49,6 +49,7 @@
 
           auto eth0
           iface eth0 inet dhcp
+              post-up route del default dev eth0
 
           auto eth1
           iface eth1 inet static
