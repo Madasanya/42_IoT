@@ -1,14 +1,14 @@
 ---
 - name: Install k3s server
   hosts: server
-  become: true
   vars:
-    server_ip: 192.168.56.110
+    eth1_interface: eth1
+    node_ip: 192.168.56.110
   tasks:
     - name: Install k3s server
       shell: |
         curl -sfL https://get.k3s.io | \
-        INSTALL_K3S_EXEC="--node-ip={{ ansible_host }} --advertise-address={{ ansible_host }}" sh -
+        INSTALL_K3S_EXEC="server --node-ip={{ node_ip }} --advertise-address={{ node_ip }} --write-kubeconfig-mode 644" sh -
       args:
         creates: /usr/local/bin/k3s
 
@@ -27,15 +27,42 @@
 
 - name: Install k3s agents
   hosts: agents
-  become: true
   vars:
-    server_ip: 192.168.56.110
+    eth1_interface: eth1
+    node_ip: 192.168.56.111
+    server_node_ip: 192.168.56.110
   tasks:
+    - name: Configure network interfaces
+      copy:
+        content: |
+          auto lo
+          iface lo inet loopback
+
+          auto eth0
+          iface eth0 inet dhcp
+
+          auto eth1
+          iface eth1 inet static
+              address {{ node_ip }}
+              netmask 255.255.255.0
+              gateway 192.168.56.1
+        dest: /etc/network/interfaces
+        backup: yes
+
+    - name: Restart networking service
+      service:
+        name: networking
+        state: restarted
+
+    - name: Wait for network to be ready
+      pause:
+        seconds: 3
+
     - name: Install K3s agent
       shell: |
         curl -sfL https://get.k3s.io | \
-        K3S_URL=https://{{ server_ip }}:6443 \
+        K3S_URL=https://{{ server_node_ip }}:6443 \
         K3S_TOKEN={{ hostvars['dbanfiS'].k3s_token }} \
-        INSTALL_K3S_EXEC="--node-ip={{ ansible_host }}" sh -
+        INSTALL_K3S_EXEC="--node-ip={{ node_ip }}" sh -
       args:
         creates: /usr/local/bin/dbanfiSW

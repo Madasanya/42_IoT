@@ -3,14 +3,14 @@
 # Update package manager and install required dependencies
 # curl: needed to download K3s and kubectl binaries
 # iptables: needed to configure port forwarding for Traefik
-sudo apk update
-sudo apk add curl iptables
+apk update
+apk add curl iptables
 
 # Install K3s in server mode with specific network configuration
 # --node-ip: sets the IP address for the node (host-only network interface)
 # --advertise-address: IP address advertised to other nodes and external clients
 # --write-kubeconfig-mode 644: makes kubeconfig readable by non-root users for easier access
-curl -sfL https://get.k3s.io | sudo INSTALL_K3S_EXEC="server --node-ip=192.168.56.110 --advertise-address=192.168.56.110 --write-kubeconfig-mode 644" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-ip=192.168.56.110 --advertise-address=192.168.56.110 --write-kubeconfig-mode 644" sh -
 
 # Wait for K3s to be fully initialized and generate its configuration file
 # The config file is needed to interact with the cluster using kubectl
@@ -30,10 +30,10 @@ fi
 # K3s stores its config in /etc/rancher/k3s/k3s.yaml, but kubectl looks in ~/.kube/config
 # Copy and set appropriate permissions so the vagrant user can run kubectl commands without sudo
 mkdir -p /home/vagrant/.kube
-sudo cp /etc/rancher/k3s/k3s.yaml /home/vagrant/.kube/config
-sudo chown vagrant:vagrant /home/vagrant/.kube/
-sudo chown vagrant:vagrant /home/vagrant/.kube/config
-sudo chmod 644 /home/vagrant/.kube/config
+cp /etc/rancher/k3s/k3s.yaml /home/vagrant/.kube/config
+chown vagrant:vagrant /home/vagrant/.kube/
+chown vagrant:vagrant /home/vagrant/.kube/config
+chmod 644 /home/vagrant/.kube/config
 
 # Export KUBECONFIG environment variable and persist it in .bashrc
 # This tells kubectl where to find the configuration file
@@ -44,8 +44,8 @@ echo "export KUBECONFIG=/home/vagrant/.kube/config" >> /home/vagrant/.bashrc
 # This ensures we have the standard kubectl command available
 # Also create a shorter alias 'k' for convenience
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-sudo ln -s /usr/local/bin/kubectl /usr/local/bin/k
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+ln -s /usr/local/bin/kubectl /usr/local/bin/k
 
 # Wait for Traefik ingress controller to be deployed and running
 # K3s includes Traefik by default, but it takes time to start
@@ -69,7 +69,7 @@ echo "Traefik service is ready"
 TRAEFIK_HTTP_PORT=$(kubectl get svc traefik -n kube-system -o jsonpath='{.spec.ports[?(@.name=="web")].nodePort}')
 if [ -n "$TRAEFIK_HTTP_PORT" ]; then
   echo "Configuring iptables to redirect port 80 to Traefik port $TRAEFIK_HTTP_PORT"
-  sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j REDIRECT --to-port $TRAEFIK_HTTP_PORT
+  iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j REDIRECT --to-port $TRAEFIK_HTTP_PORT
 fi
 
 # Deploy all application manifests from the shared confs directory

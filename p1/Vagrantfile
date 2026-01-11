@@ -29,6 +29,7 @@ Vagrant.configure("2") do |config|
       ansible.inventory_path = "./confs/inventory.yaml"
       ansible.playbook = "./confs/site.yaml"
       ansible.limit = "all"
+      ansible.become = true  # Run all tasks with elevated privileges
     end
   end
 end
