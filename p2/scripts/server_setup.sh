@@ -75,3 +75,35 @@ fi
 # Deploy all application manifests from the shared confs directory
 # This includes deployments, services, ingress rules, configmaps, and persistent volumes
 kubectl apply -f /home/vagrant/confs/
+
+# Wait for all pods to be ready in the default namespace (you can specify another namespace if needed)
+echo "Waiting for all pods to be in 'Running' state..."
+kubectl wait --for=condition=ready pod --all --timeout=600s
+
+# Define the target file to overwrite
+TARGET_FILE="/etc/network/interfaces"
+
+# Define the new content
+NEW_CONTENT=$(cat <<EOF
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+    post-up route del default dev eth0
+
+auto eth1
+iface eth1 inet static
+      address 192.168.56.110
+      netmask 255.255.255.0
+      gateway 192.168.56.1
+EOF
+)
+
+# Overwrite the file with the new content
+echo "$NEW_CONTENT" | sudo tee "$TARGET_FILE" > /dev/null
+
+# Print confirmation message
+echo "File '$TARGET_FILE' has been overwritten."
+
+sudo service networking restart
