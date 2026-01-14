@@ -69,7 +69,7 @@ echo "Creating root user in GitLab..."
 TOOLBOX_POD=$(sudo kubectl get pod -n gitlab -l app=toolbox -o jsonpath='{.items[0].metadata.name}')
 # Copy to /tmp to avoid permission issues
 sudo kubectl cp "$SCRIPT_DIR/setup_root_user.rb" gitlab/$TOOLBOX_POD:/tmp/setup_root_user.rb
-sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- gitlab-rails runner /tmp/setup_root_user.rb
+sudo kubectl exec -n gitlab "$TOOLBOX_POD" -- env GITLAB_PASSWORD="$PASSWORD" gitlab-rails runner /tmp/setup_root_user.rb
 
 if [ $? -eq 0 ]; then
   echo -e "${GREEN}Root user setup completed${NC}"

@@ -62,8 +62,8 @@ echo -e "\n${GREEN}STEP 4: Deploy Application via ArgoCD${NC}"
 chmod +x ./argocdDeploy.sh
 bash ./argocdDeploy.sh
 
-# -------- STEP 0: CLONE GITHUB REPOSITORY --------
-echo -e "\n${GREEN}STEP 0: Clone GitHub Repository${NC}"
+# -------- STEP 5: CLONE GITHUB REPOSITORY --------
+echo -e "\n${GREEN}STEP 5: Clone GitHub Repository${NC}"
 REPO_URL="https://github.com/mr-bammby/dbanfi_playground.git" # <-- Set your repo URL here
 CLONE_DIR="/tmp/github-repo-dbanfi_playground"
 if [ -d "$CLONE_DIR" ]; then

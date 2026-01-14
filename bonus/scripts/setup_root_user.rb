@@ -1,13 +1,9 @@
 #!/usr/bin/env ruby
 require 'active_record'
 
-# Load password from file or ENV
+# Load password from ENV, fall back to file or default
 password_file = '/etc/gitlab/initial_root_password/password'
-root_password = if File.exist?(password_file)
-  File.read(password_file).strip
-else
-  ENV['GITLAB_PASSWORD'] || 'changeme'
-end
+root_password = ENV['GITLAB_PASSWORD'] || (File.exist?(password_file) ? File.read(password_file).strip : 'changeme')
 
 # Connect to database (assumes Rails environment)
 # ActiveRecord::Base.establish_connection(...)

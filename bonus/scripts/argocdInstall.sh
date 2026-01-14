@@ -17,12 +17,12 @@ else
 fi
 
 # Ensure cleanup of port-forward on script exit
-cleanup() {
-  echo -e "${YELLOW}Cleaning up port-forward...${NC}"
-  sudo pkill -f "kubectl port-forward svc/argocd-server" 2>/dev/null
-  curl -kLs "https://localhost:8081" 1>/dev/null 2>/dev/null
-}
-trap cleanup EXIT
+#cleanup() {
+#  echo -e "${YELLOW}Cleaning up port-forward...${NC}"
+#  sudo pkill -f "kubectl port-forward svc/argocd-server" 2>/dev/null
+#  curl -kLs "https://localhost:8081" 1>/dev/null 2>/dev/null
+#}
+#trap cleanup EXIT
 
 # Create the Argo CD namespace and install:
 sudo kubectl create namespace argocd
