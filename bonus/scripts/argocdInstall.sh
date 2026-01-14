@@ -16,14 +16,6 @@ else
   exit 1
 fi
 
-# Ensure cleanup of port-forward on script exit
-#cleanup() {
-#  echo -e "${YELLOW}Cleaning up port-forward...${NC}"
-#  sudo pkill -f "kubectl port-forward svc/argocd-server" 2>/dev/null
-#  curl -kLs "https://localhost:8081" 1>/dev/null 2>/dev/null
-#}
-#trap cleanup EXIT
-
 # Create the Argo CD namespace and install:
 sudo kubectl create namespace argocd
 sudo kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -59,5 +51,3 @@ echo -e "${GREEN}ArgoCD password changed successfully${NC}"
 
 # to view argocd UI, open a browser and go to:
 # https://localhost:8081
-
-# Note: The port-forward will be automatically cleaned up when the script exits due to the trap set earlier.
